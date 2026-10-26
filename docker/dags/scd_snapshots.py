@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from datetime import datetime, timedelta
 
 default_args = {
     "owner": "airflow",
@@ -19,14 +20,15 @@ with DAG(
     tags=["dbt", "snapshots"],
 ) as dag:
 
+    
     dbt_snapshot = BashOperator(
         task_id="dbt_snapshot",
-        bash_command="cd /opt/airflow/banking_dbt && dbt snapshot --profiles-dir /home/airflow/.dbt"
-        )
-    dbt_run_marts = BashOperator(
-        task_id="dbt_run_marts",
-        bash_command="cd /opt/airflow/banking_dbt && dbt run --select marts --profiles-dir /home/airflow/.dbt"
+        bash_command="cd /opt/airflow/banking_dbt && dbt snapshot --profiles-dir /home/airflow/.dbt",
     )
 
+    dbt_run_marts = BashOperator(
+        task_id="dbt_run_marts",
+        bash_command="cd /opt/airflow/banking_dbt && dbt run --select marts --profiles-dir /home/airflow/.dbt",
+    )
 
-    dbt_snapshot
+    dbt_snapshot >> dbt_run_marts
